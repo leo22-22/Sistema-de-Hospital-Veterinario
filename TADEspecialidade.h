@@ -1,6 +1,11 @@
-struct TpAnimal{
-	char nome[30], especie[30], data[12];
-	int prioridade, tempoEspera, tempoProc;
+#include<string.h>
+#include<stdlib.h>
+#include<stdio.h>
+
+struct TpAnimal
+{
+	char nome[30], especie[30], data[12], prioridade[30];
+	int tempoEspera, tempoProc;
 	TpAnimal *prox;
 };
 
@@ -44,8 +49,9 @@ void InserirInicioEsp(TpDescEsp &D)
 	TpEspecialidade *novo;
 	char nome[30];
 	printf("Inserir Especialidades no Inicio\n");
-	printf("Nome (0 para sair): ");
-	scanf("%s", nome);
+	printf("Nome (0 para sair): "); fflush(stdin);
+	scanf("%[^\n]", nome);
+
 	
 	while(stricmp(nome,"0")!=0)
 	{
@@ -76,8 +82,10 @@ void InserirFimEsp(TpDescEsp &D)
 	char nome[30];
 	
 	printf("Inserir Especialidades no Fim\n");
-	printf("Nome (0 para sair): ");
-	scanf("%s", nome);
+	printf("Nome (0 para sair): "); 
+	fflush(stdin);
+	scanf("%[^\n]", nome);
+
 	
 	while(stricmp(nome, "0")!=0)
 	{
@@ -161,7 +169,9 @@ void RemoverEsp(TpDescEsp &D)
 
     printf("Remover Especialidade\n");
     printf("Nome: ");
-    scanf("%s", nome);
+    fflush(stdin);
+	scanf("%[^\n]", nome);
+
 
     if(D.Inicio == NULL)
         printf("Lista vazia!\n");

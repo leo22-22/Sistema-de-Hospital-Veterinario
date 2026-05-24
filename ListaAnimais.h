@@ -1,18 +1,4 @@
-struct TpAnimal
-{
-	char nome[30], especie[30], data[12], prioridade[30];
-	int tempoEspera, tempoProc;
-	TpAnimal *prox;
-};
-
-struct TpDescFila
-{
-	TpAnimal *Inicio, *Fim;
-	int Qtde;
-};
-
-
-void InicializarFila(TpDescFila &F);
+#include "TADEspecialidade.h"
 int FilaVazia(TpDescFila F);
 int ValorPrioridade(TpAnimal Animal);
 TpAnimal *NovoAnimal(TpAnimal Animal);
@@ -22,14 +8,6 @@ void InserirOrdenadoPrioridade(TpDescFila &F, TpAnimal Animal);
 //TpAnimal ElementoFim(TpDescritorFila Desc);
 void ExibirFila(TpDescFila F);
 //void LiberarFila(TpDescritorFila &Desc);
-
-void InicializarFila(TpDescFila &F)
-{
-	F.Inicio = NULL;
-	F.Fim = NULL;
-	F.Qtde = 0;
-}
-
 
 int FilaVazia(TpDescFila F)
 {
