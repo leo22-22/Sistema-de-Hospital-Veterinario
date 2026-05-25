@@ -29,6 +29,12 @@ struct TpDescEsp{
 struct TpAtendente{
 	int id, ocupado, TempoRestante, totalAtendidos;
 	TpAnimal *animalAtual;
+	TpAtendente *prox;
+};
+
+struct TpDescAtendente{
+	TpAtendente *Inicio, *Fim;
+	int Qtde;
 };
 
 
@@ -203,6 +209,20 @@ void RemoverEsp(TpDescEsp &D)
     }
 }
 
+void LiberarFila(TpDescFila &F){
+	TpAnimal *aux;
+	
+	while(F.Inicio != NULL)
+	{
+		aux = F.Inicio;
+		F.Inicio = F.Inicio -> prox;
+		delete aux;
+	}
+	
+	F.Fim = NULL;
+	F.Qtde = 0;
+}
+
 void LiberarEspaco(TpDescEsp &D)
 {
 	TpEspecialidade *aux;
@@ -211,6 +231,7 @@ void LiberarEspaco(TpDescEsp &D)
 	{
 		aux = D.Inicio;
 		D.Inicio = D.Inicio ->prox;
+		LiberarFila(aux->fila);
 		delete aux;
 	}
 	D.Fim = NULL;

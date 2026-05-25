@@ -27,58 +27,119 @@ void menu()
     printf("+==========================================+\n");
     printf("  Opcao: ");
 }
+
+void inicializarAtendentes(TpDescAtendente &A, int numeroAtend)
+{
+	TpAtendente *novo;
+	int i;
+	A.Inicio = A.Fim = NULL;
+	A.Qtde = 0;
+	
+	for(i=0;i<numeroAtend ; i++)
+	{
+		novo = new TpAtendente;
+		novo -> prox = NULL;
+		novo -> animalAtual = NULL;
+		novo -> id = i+1;
+		novo -> ocupado = 0;
+		novo -> totalAtendidos = 0;
+		novo -> TempoRestante = 0;
+		
+		if(A.Inicio == NULL)
+			A.Inicio = A.Fim = novo;
+		else{
+			A.Fim -> prox = novo;
+			A.Fim = novo;
+		}
+		A.Qtde++;
+	}
+}
+
+void LiberarAtendentes(TpDescAtendente &A)
+{
+	TpAtendente *aux;
+	
+	while(A.Inicio != NULL)
+	{
+		aux = A.Inicio;
+		A.Inicio = A.Inicio -> prox;
+		delete aux;
+	}
+	
+	A.Fim = NULL;
+	A.Qtde = 0;
+}
+
+void Simular(TpDescEsp &E, TpDescAtendente &A)
+{
+	TpAtendente *Aten;
+	TpEspecialidade *Esp;
+	TpAnimal *Animal;
+	TpAnimal *aux;
+	int ut = 0 ;
+	int tempoSimulacao;
+	int opcao;
+	
+	inicializarEsp(E);
+	InserirInicioEsp(E);
+	
+	printf("Quantos atendentes?\n");
+	sanf("%d",&opcao);
+	inicializarAtendentes(A, opcao);
+	
+	CarregarArquivo(E);
+	
+	printf("Tempo da Simulacao(ut): ");
+	scanf("%d", &tempoSimulacao);
+	
+	while(ut<=tempoSimulacao)
+	{
+		system("cls");
+
+        printf("/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\n");
+        printf("|     HOSPITAL VETERINARIO - ED I 2026    |\n");
+        printf("|          UT atual: %-5d                |\n", ut);
+        printf("/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\/\\n");
+
+        printf("\n[1] Inserir Especialidade Inicio");
+        printf("\n[2] Inserir Especialidade Fim");
+        printf("\n[3] Remover Especialidade");
+        printf("\n[ENTER] Continuar simulacao\n");
+        printf("Opcao: ");
+        
+        if(hbhit())
+        {
+        	opcao = getche();
+        	
+        	if(opcao =='1')
+        		InserirInicioEsp(E);
+        	else if(opcao == '2')
+        		InserirFimEsp(E);
+        	else if(opcao == '3')
+        		RemoverEsp(E);
+        }
+        
+        ExibirEsp(E);
+        
+        esp = D.Inicio;
+        
+        while(esp != NULL)
+        {
+        	atend = D.Inicio;
+        	while(atend != NULL)
+        	{
+        		if(!atend->ocupado && !FilaVazia(esp->fila))
+        		{
+        			aux = esp->fila.
+        		}
+        	}
+        }
+	}
+	
+}
  
 int main(void)
 {
-    TpDescEsp D;
-    int       opcao;
- 
-    inicializarEsp(D);
- 
-    do
-    {
-        menu();
-        scanf("%d", &opcao);
- 
-        switch(opcao)
-        {
-            case 1:
-                InserirInicioEsp(D);
-                break;
-            case 2:
-                InserirFimEsp(D);
-                break;
-            case 3:
-                RemoverEsp(D);
-                printf("\nPressione qualquer tecla...");
-                getch();
-                break;
-            case 4:
-                ExibirEsp(D);
-                printf("\nPressione qualquer tecla...");
-                getch();
-                break;
-            case 5:
-                CarregarArquivo(D);
-                printf("\nPressione qualquer tecla...");
-                getch();
-                break;
-            case 6:
-                ExibirFilaEsp(D);
-                printf("\nPressione qualquer tecla...");
-                getch();
-                break;
-            case 0:
-                printf("\nEncerrando...\n");
-                break;
-            default:
-                printf("\nOpcao invalida!\n");
-                getch();
-                break;
-        }
- 
-    }while(opcao != 0);
- 
-    LiberarEspaco(D);
+    Simular();
     return 0;
 }
