@@ -1,13 +1,12 @@
 #include "TADEspecialidade.h"
-int FilaVazia(TpDescFila F);
-int ValorPrioridade(TpAnimal Animal);
-TpAnimal *NovoAnimal(TpAnimal Animal);
-void InserirOrdenadoPrioridade(TpDescFila &F, TpAnimal Animal);
-//TpAnimal RetirarAnimal(TpDescritorFila &Desc);
-//TpAnimal ElementoInicio(TpDescritorFila Desc);
-//TpAnimal ElementoFim(TpDescritorFila Desc);
-void ExibirFila(TpDescFila F);
-//void LiberarFila(TpDescritorFila &Desc);
+int FilaVazia (TpDescFila  F);
+int ValorPrioridade (TpAnimal    Animal);
+TpAnimal *NovoAnimal (TpAnimal    Animal);
+void InserirOrdenadoPrioridade (TpDescFila &F, TpAnimal Animal);
+TpEspecialidade *MenorFila (TpDescEsp  &D);
+int LerArquivo (FILE *ptr, TpAnimal &Animal);
+void CarregarArquivo (TpDescEsp  &D);
+void ExibirFila (TpDescFila  F);
 
 int FilaVazia(TpDescFila F)
 {
@@ -83,30 +82,77 @@ void InserirOrdenadoPrioridade(TpDescFila &F, TpAnimal Animal)
 	F.Qtde++;
 }
 
+TpEspecialidade *MenorFila(TpDescEsp &D)
+{
+	TpEspecialidade *aux = D.Inicio;
+	TpEspecialidade *menor = D.Inicio;
+	
+	if(D.Inicio == NULL)
+		return NULL;
+	
+	while(aux != NULL)
+	{
+		if(aux -> fila.Qtde < menor->fila.Qtde)
+			menor = aux;
+		aux = aux -> prox;
+	}
+	
+	return menor;
+}
+
+int LerArquivo(FILE *ptr, TpAnimal &Animal)
+{
+	Animal.tempoEspera = 0;
+	
+	return fscanf(ptr, " %[^;];%d;%[^;];%[^;];%[^;\n]", Animal.prioridade, &Animal.tempoProc, Animal.nome, Animal.data, Animal.especie)==5;
+}
+
+void CarregarArquivo(TpDescEsp &D)
+{
+	TpAnimal A;
+	TpEspecialidade *menor;
+	FILE *ptr;
+	
+	if(!ListaVazia(D))
+	{
+		ptr = fopen("Animais.txt","r");
+		if(ptr!=NULL)
+		{
+			while(LerArquivo(ptr, A))
+			{
+				menor = MenorFila(D);
+				InserirOrdenadoPrioridade(menor -> fila, A);
+			}
+			fclose(ptr);
+			printf("Arquivo Gerado com sucesso!\n");
+		}else
+			printf("Erro ao abrir Arquivo!\n");
+	}else
+		printf("Nenhuma Especialidade Cadastrada!\n");
+}
+
 void ExibirFila(TpDescFila F)
 {
-	TpAnimal *Atual;
+    TpAnimal *Atual = F.Inicio;
 
-	Atual = F.Inicio;
+    if(F.Qtde == 0)
+    {
+        printf("\nFila vazia");
+        return;
+    }
 
-	if(F.Qtde == 0)
-	{
-		printf("\nFila vazia");
-	}
-	else
-	{
-		while(Atual != NULL)
-		{
-			printf("\nPrioridade: %s", Atual->prioridade);
-			printf("\nNome: %s", Atual->nome);
-			printf("\nTempo: %d", Atual->tempoProc);
-			printf("\nEspecie: %s", Atual->especie);
-			printf("\nData: %s", Atual->data);
-			printf("\n--------------------");
+    while(Atual != NULL)
+    {
+        printf("\nPrioridade: %s", Atual->prioridade);
+        printf("\nNome:       %s", Atual->nome);
+        printf("\nTempo:      %d", Atual->tempoProc);
+        printf("\nEspecie:    %s", Atual->especie);
+        printf("\nData:       %s", Atual->data);
+        printf("\n--------------------");
+        Atual = Atual->prox;
+    }
 
-			Atual = Atual->prox;
-			getch();
-		}
-	}
-
+    printf("\n\nTotal na fila: %d", F.Qtde);
+    printf("\nPressione qualquer tecla...");
+    getch(); 
 }

@@ -27,14 +27,46 @@ void menu()
     printf("+==========================================+\n");
     printf("  Opcao: ");
 }
+
+void inicializarAtendentes(TpDescAtendente &A, int numeroAtend)
+{
+	TpAtendente *novo;
+	int i;
+	A.Inicio = A.Fim = NULL;
+	A.Qtde = 0;
+	
+	for(i=0;i<numeroAtend ; i++)
+	{
+		novo = new TpAtendente;
+		novo -> prox = NULL;
+		novo -> animalAtual = NULL;
+		novo -> id = i+1;
+		novo -> ocupado = 0;
+		novo -> totalAtendidos = 0;
+		novo -> TempoRestante = 0;
+		
+		if(A.Inicio == NULL)
+			A.Inicio = A.Fim = novo;
+		else{
+			A.Fim -> prox = novo;
+			A.Fim = novo;
+		}
+		A.Qtde++;
+	}
+}
  
 int main(void)
 {
     TpDescEsp D;
-    int       opcao;
- 
+    TpDescAtendente A;
+    int opcao, nAtende;
+
     inicializarEsp(D);
- 
+	printf("Quantos Atendentes?\n");
+	scanf("%d", &nAtende);
+	
+	inicializarAtendentes(A,nAtende);
+	 
     do
     {
         menu();
