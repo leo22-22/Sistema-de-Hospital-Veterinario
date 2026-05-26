@@ -8,7 +8,6 @@ TpAnimal *NovoAnimal(TpAnimal Animal);
 void InserirOrdenadoPrioridade(TpDescFila &F, TpAnimal Animal);
 TpEspecialidade *MenorFila(TpDescEsp &D);
 int LerLinhaArquivo(FILE *ptr, TpAnimal &Animal);
-void CarregarArquivo(TpDescEsp &D);
 void ExibirFila(TpDescFila F);
 
 int FilaVazia(TpDescFila F)
@@ -41,34 +40,25 @@ void InserirOrdenadoPrioridade(TpDescFila &F, TpAnimal Animal)
 	TpAnimal *Novo, *Atual;
 	Novo = NovoAnimal(Animal);
 	if(F.Qtde == 0)
+		F.Inicio = F.Fim = Novo;
+	else if(ValorPrioridade(Animal) > ValorPrioridade(*F.Inicio))
 	{
+		Novo->prox = F.Inicio;
 		F.Inicio = Novo;
+	}
+	else if(ValorPrioridade(Animal) <= ValorPrioridade(*F.Fim))
+	{
+		F.Fim->prox = Novo;
 		F.Fim = Novo;
 	}
 	else
 	{
-		if(ValorPrioridade(Animal) > ValorPrioridade(*F.Inicio))
-		{
-			Novo->prox = F.Inicio;
-			F.Inicio = Novo;
-		}
-		else
-		{
-			if(ValorPrioridade(Animal) <= ValorPrioridade(*F.Fim))
-			{
-				F.Fim->prox = Novo;
-				F.Fim = Novo;
-			}
-			else
-			{
-				Atual = F.Inicio;
-				while(Atual->prox != NULL &&
-					ValorPrioridade(Animal) <= ValorPrioridade(*(Atual->prox)))
-					Atual = Atual->prox;
-				Novo->prox = Atual->prox;
-				Atual->prox = Novo;
-			}
-		}
+		Atual = F.Inicio;
+		while(Atual->prox != NULL &&
+			ValorPrioridade(Animal) <= ValorPrioridade(*(Atual->prox)))
+			Atual = Atual->prox;
+		Novo->prox = Atual->prox;
+		Atual->prox = Novo;
 	}
 	F.Qtde++;
 }
@@ -91,34 +81,9 @@ TpEspecialidade *MenorFila(TpDescEsp &D)
 int LerLinhaArquivo(FILE *ptr, TpAnimal &Animal)
 {
 	Animal.tempoEspera = 0;
-	return fscanf(ptr, " %[^;];%d;%[^;];%[^;];%[^;\n]",
+	return fscanf(ptr, " %[^,],%d,%[^,],%[^,],%[^,\n]",
 		Animal.prioridade, &Animal.tempoProc,
 		Animal.nome, Animal.data, Animal.especie) == 5;
-}
-
-void CarregarArquivo(TpDescEsp &D)
-{
-	TpAnimal A;
-	TpEspecialidade *menor;
-	FILE *ptr;
-	if(!ListaVazia(D))
-	{
-		ptr = fopen("Animais.txt", "r");
-		if(ptr != NULL)
-		{
-			while(LerLinhaArquivo(ptr, A))
-			{
-				menor = MenorFila(D);
-				InserirOrdenadoPrioridade(menor->fila, A);
-			}
-			fclose(ptr);
-			printf("Arquivo carregado com sucesso!\n");
-		}
-		else
-			printf("Erro ao abrir Arquivo!\n");
-	}
-	else
-		printf("Nenhuma Especialidade Cadastrada!\n");
 }
 
 void ExibirFila(TpDescFila F)

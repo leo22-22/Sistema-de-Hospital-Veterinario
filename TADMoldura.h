@@ -106,7 +106,7 @@ void desenharBordas()
 	textcolor(7);
 }
 
-void desenharCabecalho(int ut, int arquivoOk)
+void desenharCabecalho(int ut, int tempoSim, int arquivoOk)
 {
 	char status[20];
 	textcolor(15);
@@ -115,7 +115,7 @@ void desenharCabecalho(int ut, int arquivoOk)
 		strcpy(status, "Lendo arquivo...");
 	else
 		strcpy(status, "Arquivo concluido");
-	printf("=[ HOSPITAL VETERINARIO - ED I 2026 ]=[ UT: %-5d ]=[ %-17s ]===============", ut, status);
+	printf("=[ HOSPITAL VETERINARIO - ED I 2026 ]=[ UT: %-4d/%-4d ]=[ %-17s ]=======", ut, tempoSim, status);
 	textcolor(7);
 }
 
@@ -249,9 +249,9 @@ void exibirFilaMoldura(TpDescEsp &D)
 	textcolor(7);
 }
 
-void atualizarTela(TpDescEsp &D, int ut, int arquivoOk)
+void atualizarTela(TpDescEsp &D, int ut, int tempoSim, int arquivoOk)
 {
-	desenharCabecalho(ut, arquivoOk);
+	desenharCabecalho(ut, tempoSim, arquivoOk);
 	exibirFilaMoldura(D);
 	desenharRodape();
 }

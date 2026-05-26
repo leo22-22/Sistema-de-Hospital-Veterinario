@@ -35,6 +35,22 @@ int FilasOcupadas(TpEspecialidade *esp)
 	return resultado;
 }
 
+void ContarRestantes(TpEspecialidade *esp)
+{
+	TpAnimal *animal;
+	animal = esp->fila.Inicio;
+	while(animal != NULL)
+	{
+		if(strcmp(animal->prioridade, "Emergencia") == 0)
+			esp->restantesEmerg++;
+		else if(strcmp(animal->prioridade, "Urgencia") == 0)
+			esp->restantesUrgen++;
+		else
+			esp->restantesRotin++;
+		animal = animal->prox;
+	}
+}
+
 void AlocarAtendente(TpEspecialidade *esp)
 {
 	TpAtendente *atend;
@@ -54,7 +70,9 @@ void AlocarAtendente(TpEspecialidade *esp)
 			atend->TempoRestante = aux->tempoProc;
 			atend->ocupado = 1;
 			atend->totalAtendidos++;
-			sprintf(msg, "[->]A%d pegou %-10s (%s) %dut", atend->id, atend->animalAtual->nome, atend->animalAtual->prioridade, atend->TempoRestante);
+			sprintf(msg, "[->]A%d pegou %-10s (%s) %dut",
+				atend->id, atend->animalAtual->nome,
+				atend->animalAtual->prioridade, atend->TempoRestante);
 			adicionarLog(10, msg);
 		}
 		atend = atend->prox;
@@ -71,13 +89,31 @@ void ProcessarAtendente(TpEspecialidade *esp)
 		if(atend->ocupado)
 		{
 			atend->TempoRestante--;
-			sprintf(msg, "[..]A%d %-12s| restam %dut", atend->id, atend->animalAtual->nome, atend->TempoRestante);
+			sprintf(msg, "[..]A%d %-12s| restam %dut",
+				atend->id, atend->animalAtual->nome,
+				atend->TempoRestante);
 			adicionarLog(7, msg);
 			if(atend->TempoRestante == 0)
 			{
-				sprintf(msg, "[OK]A%d TERMINOU %-10s!", atend->id, atend->animalAtual->nome);
+				sprintf(msg, "[OK]A%d TERMINOU %-10s!",
+					atend->id, atend->animalAtual->nome);
 				adicionarLog(12, msg);
 				esp->atendidos++;
+				if(strcmp(atend->animalAtual->prioridade, "Emergencia") == 0)
+				{
+					esp->totalEsperaEmerg += atend->animalAtual->tempoEspera;
+					esp->contEmerg++;
+				}
+				else if(strcmp(atend->animalAtual->prioridade, "Urgencia") == 0)
+				{
+					esp->totalEsperaUrgen += atend->animalAtual->tempoEspera;
+					esp->contUrgen++;
+				}
+				else
+				{
+					esp->totalEsperaRotin += atend->animalAtual->tempoEspera;
+					esp->contRotin++;
+				}
 				delete atend->animalAtual;
 				atend->animalAtual = NULL;
 				atend->ocupado = 0;
@@ -125,6 +161,82 @@ int PausaComTecla(TpDescEsp &E)
 	return encerrar;
 }
 
+void Relatorio(TpDescEsp &E, int ut)
+{
+	TpEspecialidade *esp;
+	int totalEmerg, totalUrgen, totalRotin;
+	int restEmerg, restUrgen, restRotin;
+	float mediaEmerg, mediaUrgen, mediaRotin;
+	int somaEspEmerg, somaEspUrgen, somaEspRotin;
+
+	totalEmerg   = totalUrgen   = totalRotin   = 0;
+	restEmerg    = restUrgen    = restRotin    = 0;
+	somaEspEmerg = somaEspUrgen = somaEspRotin = 0;
+
+	esp = E.Inicio;
+	while(esp != NULL)
+	{
+		ContarRestantes(esp);
+		totalEmerg   += esp->contEmerg;
+		totalUrgen   += esp->contUrgen;
+		totalRotin   += esp->contRotin;
+		restEmerg    += esp->restantesEmerg;
+		restUrgen    += esp->restantesUrgen;
+		restRotin    += esp->restantesRotin;
+		somaEspEmerg += esp->totalEsperaEmerg;
+		somaEspUrgen += esp->totalEsperaUrgen;
+		somaEspRotin += esp->totalEsperaRotin;
+		esp = esp->prox;
+	}
+
+	mediaEmerg = 0;
+	mediaUrgen = 0;
+	mediaRotin = 0;
+	if(totalEmerg > 0)
+		mediaEmerg = (float)somaEspEmerg / totalEmerg;
+	if(totalUrgen > 0)
+		mediaUrgen = (float)somaEspUrgen / totalUrgen;
+	if(totalRotin > 0)
+		mediaRotin = (float)somaEspRotin / totalRotin;
+
+	system("cls");
+	printf("+==================================================+\n");
+	printf("|      RELATORIO FINAL - HOSPITAL VETERINARIO     |\n");
+	printf("|                  UT Total: %-5d               |\n", ut);
+	printf("+==================================================+\n");
+	printf("|                                                  |\n");
+	printf("|  ANIMAIS ATENDIDOS POR PRIORIDADE:               |\n");
+	printf("|  Emergencia: %-5d                              |\n", totalEmerg);
+	printf("|  Urgencia:   %-5d                              |\n", totalUrgen);
+	printf("|  Rotina:     %-5d                              |\n", totalRotin);
+	printf("|  Total:      %-5d                              |\n", totalEmerg + totalUrgen + totalRotin);
+	printf("|                                                  |\n");
+	printf("|  TEMPO MEDIO DE ESPERA POR PRIORIDADE:           |\n");
+	printf("|  Emergencia: %6.2f ut                          |\n", mediaEmerg);
+	printf("|  Urgencia:   %6.2f ut                          |\n", mediaUrgen);
+	printf("|  Rotina:     %6.2f ut                          |\n", mediaRotin);
+	printf("|                                                  |\n");
+	printf("|  ANIMAIS QUE PERMANECERAM NA FILA:               |\n");
+	printf("|  Emergencia: %-5d                              |\n", restEmerg);
+	printf("|  Urgencia:   %-5d                              |\n", restUrgen);
+	printf("|  Rotina:     %-5d                              |\n", restRotin);
+	printf("|  Total:      %-5d                              |\n", restEmerg + restUrgen + restRotin);
+	printf("|                                                  |\n");
+	printf("|  DETALHES POR ESPECIALIDADE:                     |\n");
+	printf("|--------------------------------------------------||\n");
+	esp = E.Inicio;
+	while(esp != NULL)
+	{
+		printf("|  %-15s atendidos:%-4d restantes:%-4d     |\n",
+			esp->nome, esp->atendidos, esp->fila.Qtde);
+		esp = esp->prox;
+	}
+	printf("|                                                  |\n");
+	printf("+==================================================+\n");
+	printf("Pressione qualquer tecla para sair...");
+	getch();
+}
+
 void Simular(TpDescEsp &E)
 {
 	TpEspecialidade *esp;
@@ -133,7 +245,7 @@ void Simular(TpDescEsp &E)
 	FILE *ptr;
 	char msg[60];
 	char sep[60];
-	int ut = 0, arquivoOk = 1;
+	int ut = 0, arquivoOk = 1, tempoSim;
 
 	fixarJanela();
 	system("cls");
@@ -156,6 +268,9 @@ void Simular(TpDescEsp &E)
 	gotoxy(35, 18);
 	printf("Arquivo Animais.txt aberto!               ");
 	gotoxy(35, 19);
+	printf("Tempo da simulacao (ut): ");
+	tempoSim = lerInteiro(1, 9999);
+	gotoxy(35, 20);
 	printf("Pressione qualquer tecla para iniciar...");
 	getch();
 
@@ -163,9 +278,9 @@ void Simular(TpDescEsp &E)
 	desenharBordas();
 	lin_log = LIN_INICIO;
 
-	while(arquivoOk || FilasOcupadas(E.Inicio))
+	while((arquivoOk || FilasOcupadas(E.Inicio)) && ut <= tempoSim)
 	{
-		atualizarTela(E, ut, arquivoOk);
+		atualizarTela(E, ut, tempoSim, arquivoOk);
 
 		if(arquivoOk)
 		{
@@ -175,7 +290,9 @@ void Simular(TpDescEsp &E)
 				if(menor != NULL)
 				{
 					InserirOrdenadoPrioridade(menor->fila, Animal);
-					sprintf(msg, "[+]UT=%-3d %-10s (%s)->%s", ut, Animal.nome, Animal.prioridade, menor->nome);
+					sprintf(msg, "[+]UT=%-3d %-10s (%s)->%s",
+						ut, Animal.nome,
+						Animal.prioridade, menor->nome);
 					adicionarLog(14, msg);
 				}
 			}
@@ -203,6 +320,7 @@ void Simular(TpDescEsp &E)
 		{
 			if(arquivoOk)
 				fclose(ptr);
+			Relatorio(E, ut);
 			LiberarEspaco(E);
 			return;
 		}
@@ -212,12 +330,7 @@ void Simular(TpDescEsp &E)
 	if(arquivoOk)
 		fclose(ptr);
 
-	adicionarLog(10, "Simulacao concluida!");
-	sprintf(msg, "UT total: %d", ut);
-	adicionarLog(10, msg);
-	gotoxy(1, LIN_RODAPE + 1);
-	printf("Simulacao concluida! UT=%d | Pressione qualquer tecla...", ut);
-	getch();
+	Relatorio(E, ut);
 	LiberarEspaco(E);
 }
 
