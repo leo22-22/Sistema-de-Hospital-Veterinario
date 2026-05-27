@@ -6,6 +6,7 @@
 #include "TADEspecialidade.h"
 #include "ListaAnimais.h"
 #include "TADMoldura.h"
+#include <time.h>
 
 int AtendentesOcupados(TpAtendente *atend)
 {
@@ -141,7 +142,7 @@ int PausaComTecla(TpDescEsp &E)
 		getch();
 	for(i = 0; i < 25; i++)
 	{
-		Sleep(100);
+		Sleep(15);
 		if(kbhit())
 		{
 			opcao = getch();
@@ -237,6 +238,23 @@ void Relatorio(TpDescEsp &E, int ut)
 	getch();
 }
 
+TpEspecialidade *EspecialidadeAleatoria(TpDescEsp &D)
+{
+	TpEspecialidade *aux;
+	int posicao, i;
+
+	if(D.Inicio == NULL || D.Qtde == 0)
+		return NULL;
+
+	posicao = rand() % D.Qtde;
+
+	aux = D.Inicio;
+	for(i = 0; i < posicao; i++)
+		aux = aux->prox;
+
+	return aux;
+}
+
 void Simular(TpDescEsp &E)
 {
 	TpEspecialidade *esp;
@@ -246,6 +264,7 @@ void Simular(TpDescEsp &E)
 	char msg[60];
 	char sep[60];
 	int ut = 0, arquivoOk = 1, tempoSim;
+	int tempoChegada = 5;
 
 	fixarJanela();
 	system("cls");
@@ -278,15 +297,18 @@ void Simular(TpDescEsp &E)
 	desenharBordas();
 	lin_log = LIN_INICIO;
 
+	srand(time(NULL));
+
 	while((arquivoOk || FilasOcupadas(E.Inicio)) && ut <= tempoSim)
 	{
 		atualizarTela(E, ut, tempoSim, arquivoOk);
 
-		if(arquivoOk)
+		if(arquivoOk && ut % tempoChegada == 0)
 		{
 			if(LerLinhaArquivo(ptr, Animal))
 			{
-				menor = MenorFila(E);
+				menor = EspecialidadeAleatoria(E);
+
 				if(menor != NULL)
 				{
 					InserirOrdenadoPrioridade(menor->fila, Animal);
@@ -324,6 +346,7 @@ void Simular(TpDescEsp &E)
 			LiberarEspaco(E);
 			return;
 		}
+
 		ut++;
 	}
 
